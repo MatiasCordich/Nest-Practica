@@ -17,26 +17,40 @@ export class PokemonService {
     @InjectModel(Pokemon.name) private readonly pokemonModel: Model<Pokemon>,
   ) {}
 
-  async create(createPokemonDto: CreatePokemonDto) {
+  async create(createPokemonDto: CreatePokemonDto): Promise<Object> {
+
     // Nos aseguramos que a la hora de escribir el nombre del pokemon no tenga caracteres especiales como mayuscula
     createPokemonDto.name = createPokemonDto.name.toLowerCase();
 
     try {
+
       // Creamos nuestro nuevo pokemon a partir del modelo y lo creamos con el metodo que nos ofrece para los modelos
       const newPokemon = await this.pokemonModel.create(createPokemonDto);
 
       // Retornamos el nuevo pokeon creado
-      return {msg: "Pokemon CREADO", newPokemon};
+      return { msg: "Pokemon CREADO", newPokemon };
+
     } catch (error) {
       this.handleExceptions(error);
     }
   }
 
-  findAll() {
-    return `This action returns all pokemon`;
+  async findAll(): Promise<Pokemon[]> {
+
+    let pokemons: Pokemon[];
+
+    // Primero buscamos nuestra lista de pokemones en la DB
+    pokemons = await this.pokemonModel.find();
+
+    // Si la lista esta vacia entonces devuelvo un mensaje de error
+    if (pokemons.length == 0) throw new BadRequestException("No hay pokemones en la lista");
+    
+    // Caso contrario que me de la lista de pokemones
+    return pokemons;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Pokemon> {
+
     let pokemon: Pokemon;
 
     // Primero vamos a hacer unas capas de validaciones que seran las siguientes
@@ -76,9 +90,9 @@ export class PokemonService {
     return pokemon;
   }
 
-  async update(term: string, updatePokemonDto: UpdatePokemonDto) {
-    // Primero buscamos el pokemon a actualizar
+  async update(term: string,updatePokemonDto: UpdatePokemonDto): Promise<Object> {
 
+    // Primero buscamos el pokemon a actualizar
     let pokemon: Pokemon;
 
     pokemon = await this.findOne(term);
@@ -102,14 +116,13 @@ export class PokemonService {
 
       const updatedPokemon = { ...pokemon.toJSON(), ...updatePokemonDto };
 
-      return {msg: "Pokemon MODIFICADO", updatePokemonDto}
+      return { msg: "Pokemon MODIFICADO", updatePokemonDto };
     } catch (error) {
       this.handleExceptions(error);
     }
   }
 
-  async remove(id: string) {
-
+  async remove(id: string): Promise<Object> {
     // Primero buscamos el pokemon a eliminar mediante el id
     const pokemonToDelete = await this.findOne(id);
 
@@ -121,7 +134,7 @@ export class PokemonService {
 
     const deletedPokemon = await pokemonToDelete.deleteOne();
 
-    return {msg: "Pokemon ELIMINADO", deletedPokemon}
+    return { msg: "Pokemon ELIMINADO", deletedPokemon };
   }
 
   // Vamos a crear algunos metodos que nos sirven para poder modularizar el codigo
