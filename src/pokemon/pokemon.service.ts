@@ -108,11 +108,21 @@ export class PokemonService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} pokemon`;
+  async remove(id: string) {
+
+    // Primero buscamos el pokemon a eliminar mediante el id
+    const pokemonToDelete = await this.findOne(id)
+
+    // Si el pokemon a eliminar no existe, entonces mostarme un error
+
+    if (!pokemonToDelete) throw new NotFoundException("El pokemon no existe");
+
+    // Si existe entonces eliminalo
+
+    await pokemonToDelete.deleteOne()
   }
 
-  // Vamoas a crear algunos metodos que nos sirven para poder modularizar el codigo
+  // Vamos a crear algunos metodos que nos sirven para poder modularizar el codigo
 
   private handleExceptions(error: any) {
     if (error.code === 11000) {

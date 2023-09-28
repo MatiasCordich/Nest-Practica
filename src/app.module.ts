@@ -5,6 +5,7 @@ import { join } from 'path';
 import { PokemonModule } from './pokemon/pokemon.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configOptions } from './config/config.options';
+import { CommonModule } from './common/common.module';
 
 
 @Module({
@@ -23,7 +24,8 @@ import { configOptions } from './config/config.options';
 
         return { uri: mongoConfig.uri}
       }
-    })
+    }),
+    CommonModule
   ],
 })
 export class AppModule {}
