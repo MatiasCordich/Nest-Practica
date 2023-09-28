@@ -26,7 +26,7 @@ export class PokemonService {
       const newPokemon = await this.pokemonModel.create(createPokemonDto);
 
       // Retornamos el nuevo pokeon creado
-      return newPokemon;
+      return {msg: "Pokemon CREADO", newPokemon};
     } catch (error) {
       this.handleExceptions(error);
     }
@@ -102,7 +102,7 @@ export class PokemonService {
 
       const updatedPokemon = { ...pokemon.toJSON(), ...updatePokemonDto };
 
-      return updatedPokemon;
+      return {msg: "Pokemon MODIFICADO", updatePokemonDto}
     } catch (error) {
       this.handleExceptions(error);
     }
@@ -111,7 +111,7 @@ export class PokemonService {
   async remove(id: string) {
 
     // Primero buscamos el pokemon a eliminar mediante el id
-    const pokemonToDelete = await this.findOne(id)
+    const pokemonToDelete = await this.findOne(id);
 
     // Si el pokemon a eliminar no existe, entonces mostarme un error
 
@@ -119,7 +119,9 @@ export class PokemonService {
 
     // Si existe entonces eliminalo
 
-    await pokemonToDelete.deleteOne()
+    const deletedPokemon = await pokemonToDelete.deleteOne();
+
+    return {msg: "Pokemon ELIMINADO", deletedPokemon}
   }
 
   // Vamos a crear algunos metodos que nos sirven para poder modularizar el codigo
