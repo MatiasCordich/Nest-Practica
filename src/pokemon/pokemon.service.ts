@@ -28,11 +28,7 @@ export class PokemonService {
       // Retornamos el nuevo pokeon creado
       return newPokemon;
     } catch (error) {
-      if (error.code === 11000) {
-        throw new BadRequestException("El Pokemon ya existe");
-      }
-
-      throw new InternalServerErrorException("No se pudo crear el pokemon");
+      this.handleExceptions(error);
     }
   }
 
@@ -81,7 +77,6 @@ export class PokemonService {
   }
 
   async update(term: string, updatePokemonDto: UpdatePokemonDto) {
-
     // Primero buscamos el pokemon a actualizar
 
     let pokemon: Pokemon;
@@ -92,23 +87,38 @@ export class PokemonService {
 
     if (!pokemon) throw new NotFoundException("El pokemon no existe");
 
-    // Si el pokemon existe voy a modificar la data del DTO de la variable pokemonToFind
+    // Si el pokemon existe voy a modificar la data del DTO de la variable pokemon
 
+    // Nos aseguramos que a la hora de escribir el nombre del pokemon no tenga caracteres especiales como mayuscula
     if (updatePokemonDto.name) {
       updatePokemonDto.name = updatePokemonDto.name.toLowerCase();
     }
 
-    // Actulizamos la data del pokemon encontrado
-    await pokemon.updateOne(updatePokemonDto);
+    try {
+      // Actulizamos la data del pokemon encontrado
+      await pokemon.updateOne(updatePokemonDto);
 
-    // Creamos una variable que contenga la nueva informacion, para eso va a tener, todas la propiedades del objeto pokemon (convertidas en JSON) y voy a sobreescribirles las propiedades que tiene updatePokemonDto
+      // Creamos una variable que contenga la nueva informacion, para eso va a tener, todas la propiedades del objeto pokemon (convertidas en JSON) y voy a sobreescribirles las propiedades que tiene updatePokemonDto
 
-    const updatedPokemon = {...pokemon.toJSON(), ...updatePokemonDto}
+      const updatedPokemon = { ...pokemon.toJSON(), ...updatePokemonDto };
 
-    return updatedPokemon
+      return updatedPokemon;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
   }
 
   remove(id: number) {
     return `This action removes a #${id} pokemon`;
+  }
+
+  // Vamoas a crear algunos metodos que nos sirven para poder modularizar el codigo
+
+  private handleExceptions(error: any) {
+    if (error.code === 11000) {
+      throw new BadRequestException("El Pokemon ya existe");
+    }
+
+    throw new InternalServerErrorException("No se pudo crear el pokemon");
   }
 }
